@@ -1,0 +1,77 @@
+﻿<script src="Chart.min.js"></script>
+<template id="chart-pie">
+    <canvas class="myChart" width="200" height="200"></canvas>
+</template>
+
+<script>
+    // thisDoc refers to the "importee", which is component.html
+    var thisDoc = document.currentScript.ownerDocument;
+
+    // thatDoc refers to the "importer", which is index.html
+    var thatDoc = document;
+
+    var template = thisDoc.querySelector('#chart-pie');
+
+    // Make sure you extend an existing HTMLElement prototype
+    var ChartPieProto = Object.create(HTMLElement.prototype);
+
+    //Object.defineProperty(ChartPieProto, 'colors', {
+    //    value: ["#008000","#FFFF00"],
+    //    writable: true
+    //});
+    //Object.defineProperty(ChartPieProto, 'values', {
+    //    value: [90,90],
+    //    writable: true
+    //});
+    //Object.defineProperty(ChartPieProto, 'labels', {
+    //    value: ["A","B"],
+    //    writable: true
+    //});
+
+
+    // Setup optional lifecycle callbacks: createdCallback,
+    // enteredDocumentCallback, leftDocumentCallback and
+    // attributeChangedCallback
+    ChartPieProto.createdCallback = function () {
+
+        // Create a ShadowDOM to hold our template content
+        var b = this.badges;
+        var root = this.createShadowRoot();
+        var clone = thatDoc.importNode(template.content, true);
+
+        // Create the pie chart with Chart.js
+        var colorsAtt = this.getAttribute("colors").split(",");
+        var valsAtt = this.getAttribute("values").split(",");
+        var labelsAtt = this.getAttribute("labels").split(",");
+        
+        var data = [];
+        if (colorsAtt && valsAtt && labelsAtt) {
+            for (var i = 0; i < valsAtt.length; i++) {
+                data.push({
+                    value: parseInt(valsAtt[i]),
+                    color: colorsAtt[i],
+                    label: labelsAtt[i]
+                });
+            }
+        }
+        //else {
+        //    for (var i = 0; i < this.values.length; i++) {
+        //        data.push({
+        //            value: this.values[i],
+        //            color: this.colors[i],
+        //            label: this.labels[i]
+        //        });
+        //    }
+        //}
+        //Get the context of the canvas element we want to select
+        var ctx = clone.querySelector('.myChart').getContext('2d');
+        var myNewChart = new Chart(ctx).Pie(data);
+
+        // Add the template content + chart to our Shadow DOM
+        root.appendChild(clone);
+    };
+
+    var ChartPie = thatDoc.registerElement('chart-pie', { prototype: ChartPieProto });
+    //var chartPie = new ChartPie();
+    //var chartPie = document.createElement('chart-pie');
+</script>
